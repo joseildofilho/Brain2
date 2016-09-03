@@ -1,61 +1,68 @@
 import java.util.Random;
-import java.util.Vector;
 
-/**
- * Created by root on 01/09/16.
- */
 public class Neuronio {
 
-    private Vector<Double> pesos;
+    private double[] pesos;
     private FuncaoAtivacao funcaoAtivacao;
     private double bias;
     private double N;
-    private boolean treinado = false;
+    private int ciclesMax;
 
-    public Neuronio(FuncaoAtivacao funcaoAtivacao, double bias, double n) {
-        pesos = new Vector<>();
+    public Neuronio(FuncaoAtivacao funcaoAtivacao, double bias, double n, int w,int m) {
+        ciclesMax = m;
+        pesos = new double[w];
         this.funcaoAtivacao = funcaoAtivacao;
         this.bias = bias;
         N = n;
+        reiniciarPesos();
     }
 
-    public Neuronio treinamento(Vector<Vector<Double>> conjuentoTreinamento) {
-        conjuentoTreinamento.forEach(a->{
-            treinar(a,a.remove(0));
-        });
-        treinado = true;
+    public Neuronio treinamento(double[][] conjuntoTreinamento, double[] rotulos) {
+
+        int erro = conjuntoTreinamento.length;
+        int cicles = ciclesMax;
+        while((erro != 0) && (cicles != 0)) {
+            for(int i = 0; i < conjuntoTreinamento.length; i++) {
+                double[] w = conjuntoTreinamento[i];
+                double f = funcaoAtivacao.executar(funcaoSoma(w));
+                double diff = rotulos[i] - f;
+                if(diff != 0) {
+                    ajustaPesos(w,diff);
+                } else erro --;
+            }
+            if(erro != 0) {
+                erro = conjuntoTreinamento.length;
+            }
+            cicles--;
+        }
         return this;
     }
 
-    public void treinar(Vector<Double> conjuntoTreinamento,double rotulo) {
-        if(pesos.size() == 0) conjuntoTreinamento.forEach(a -> pesos.add(new Random().nextDouble()));
-        double erro;
-        double result = funcaoAtivacao.executar(funcaoSoma(conjuntoTreinamento));
-        System.out.println(result+" "+pesos.get(0)+" "+pesos.get(1));
-        erro = rotulo - result;
-        System.out.println("valor do erro:"+erro);
-        if (erro > 0) ajustaPesos(conjuntoTreinamento, erro);
-
+    public double executar(double[] entrada) {
+        double result = funcaoAtivacao.executar(funcaoSoma(entrada));
+        System.out.println("Valor do teste:"+result);
+        return result;
     }
 
-    public double executar(Vector<Double> entrada) {
-        entrada.remove(0);
-        return funcaoAtivacao.executar(funcaoSoma(entrada));
-    }
+    private void ajustaPesos(double[] conjuntoTreinamento, double erro) {
+        for(int i = 0; i < conjuntoTreinamento.length; i++) {
 
-    private void ajustaPesos(Vector<Double> conjuntoTreinamento, double erro) {
-        for(int i = 0; i < conjuntoTreinamento.size(); i++) {
-            double calculo = pesos.get(i) + (N*conjuntoTreinamento.get(i)*erro);
-            pesos.set(i,calculo);
+            double calculo = pesos[i] + (N*conjuntoTreinamento[i]*erro);
+            pesos[i] = calculo;
         }
     }
 
-    private double funcaoSoma(Vector<Double> entradas) {
+    private double funcaoSoma(double[] entradas) {
         double t = 0;
-        for(int i = 0; i < entradas.size(); i++) {
-            t = t + (entradas.get(i)*pesos.get(i)) + bias;
+        for(int i = 0; i < entradas.length; i++) {
+            t = t + (entradas[i]*pesos[i]) + bias;
         }
         return t;
+    }
+
+    public void reiniciarPesos() {
+        Random r = new Random();
+        for(int i = 0; i < pesos.length; i++) pesos[i] = r.nextDouble();
     }
 
 }
