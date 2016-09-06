@@ -25,8 +25,8 @@ public class Neuronio {
             for(int i = 0; i < conjuntoTreinamento.length; i++) {
                 double[] w = conjuntoTreinamento[i];
                 double f = funcaoAtivacao.executar(funcaoSoma(w));
-                double diff = rotulos[i] - f;
-                if(diff != 0) {
+                double diff = rotulos[i] - (f);
+                if(diff < 0) {
                     ajustaPesos(w,diff);
                 } else erro --;
             }
@@ -35,6 +35,7 @@ public class Neuronio {
             }
             cicles--;
         }
+        System.out.println(ciclesMax-cicles);
         return this;
     }
 
@@ -47,8 +48,8 @@ public class Neuronio {
     private void ajustaPesos(double[] conjuntoTreinamento, double erro) {
         for(int i = 0; i < conjuntoTreinamento.length; i++) {
 
-            double calculo = pesos[i] + (N*conjuntoTreinamento[i]*erro);
-            pesos[i] = calculo;
+            double calculo = N*conjuntoTreinamento[i]*erro;
+            pesos[i] += calculo;
         }
     }
 

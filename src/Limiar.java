@@ -8,7 +8,7 @@ public class Limiar implements FuncaoAtivacao {
 
     @Override
     public double executar(double valor) {
-        if(valor > 0) {
+        if(Math.round(valor) > 0) {
             return 1;
         }
         return 0;
